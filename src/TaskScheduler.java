@@ -3,9 +3,7 @@
  */
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.ArrayList;
+import java.util.*;
 //import java.util.
 //import java.awt.Entr
 import java.util.Map.Entry;
@@ -14,15 +12,68 @@ import java.util.Map.Entry;
 public class TaskScheduler {
     static void scheduler(String file1, String file2, Integer m) {
 
-        TaskHeapPQ releasePQ, deadlinePQ;
+        HeapPriorityQueue releasePQ, deadlinePQ;
 
         releasePQ = fileToReleasePQ(file1);
+        deadlinePQ = new TaskHeapPQ();
+        LinkedList schedule = new LinkedList<>();
+
+        schedulerHelper(schedule, releasePQ, deadlinePQ, 3);
 //        System.out.println(releasePQ.min());
 //        releasePQ.printTasks();
-        System.out.println(releasePQ.toString());
+//        System.out.println(releasePQ.toString());
+
 //
 
 
+    }
+
+    protected static void schedulerHelper(LinkedList schedule, HeapPriorityQueue releasePQ, HeapPriorityQueue deadlinePQ, int numOfCores) {
+        int currentTime, releaseTime, coresCounter;
+        currentTime = 0; // check this
+//        coresCounter = 0;
+
+        while(!releasePQ.isEmpty()) {
+            coresCounter = 0;
+            releaseTime = (Integer) releasePQ.min().getKey();
+
+            // Accounts for if the cores were overflowed during previous currentTime value
+            if (deadlinePQ.isEmpty()) {
+                currentTime = releaseTime;
+            }
+            else {
+                if (currentTime > (Integer) deadlinePQ.min().getKey()) {
+                    System.out.println("Core overflow. No valid schedule for Task: "+deadlinePQ.min().getValue());
+                    return;
+                }
+            }
+
+            // Adds on to deadlinePQ and assesses all the tasks of equal releaseTime
+            while (releaseTime == currentTime) {
+
+                HeapPriorityQueue.MyEntry minReleaseEntry = (HeapPriorityQueue.MyEntry) releasePQ.removeMin();
+                Task minReleaseTask = (Task) minReleaseEntry.getValue();
+                deadlinePQ.insert(minReleaseTask.deadline, minReleaseTask);
+                if (releasePQ.isEmpty()) break;
+                releaseTime = (Integer) releasePQ.min().getKey();
+            }
+
+            // Removes from deadlinePQ and adds it to schedule. If deadlinePQ still has members we will assess it with the next round of tasks of same releaseTime.
+            while (coresCounter < numOfCores) {
+                if (deadlinePQ.isEmpty()) break;
+                ArrayList taskTime = new ArrayList();
+                taskTime.add((Task) deadlinePQ.removeMin().getValue());
+                taskTime.add(currentTime);
+
+                schedule.push(taskTime);
+
+                coresCounter ++;
+            }
+
+            currentTime ++;
+        }
+
+//        return;
     }
 
     /**
