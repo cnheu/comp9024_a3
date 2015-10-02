@@ -16,7 +16,7 @@ public class TaskScheduler {
 
         releasePQ = fileToReleasePQ(file1);
         deadlinePQ = new TaskHeapPQ();
-        LinkedList schedule = new LinkedList<>();
+        ArrayList schedule = new ArrayList<>(releasePQ.size());
 
         schedulerHelper(schedule, releasePQ, deadlinePQ, m);
         for (int i = 0; i < schedule.size(); i ++) {
@@ -31,7 +31,7 @@ public class TaskScheduler {
 
     }
 
-    protected static void schedulerHelper(LinkedList schedule, HeapPriorityQueue releasePQ, HeapPriorityQueue deadlinePQ, int numOfCores) {
+    protected static void schedulerHelper(ArrayList schedule, HeapPriorityQueue releasePQ, HeapPriorityQueue deadlinePQ, int numOfCores) {
         int currentTime, releaseTime, coresCounter;
         currentTime = 0;
         releaseTime = 0;
@@ -68,7 +68,7 @@ public class TaskScheduler {
                 ArrayList taskTime = new ArrayList();
                 taskTime.add((Task) deadlinePQ.removeMin().getValue());
                 taskTime.add(currentTime);
-                schedule.push(taskTime);
+                schedule.add(taskTime);
                 coresCounter ++;
             }
             currentTime ++;
@@ -117,7 +117,8 @@ public class TaskScheduler {
 //                    counter = 0;
 //                }
 //            }
-            
+
+            // Process each row one at a time
             while (input.hasNextLine()) {
                 String[] inputStringArray = input.nextLine().split("\\W+");
                 int counter = 0;
@@ -149,6 +150,8 @@ public class TaskScheduler {
 
         return releasePQ;
     }
+
+    //TODO: write ArrayList schedule to a file
 
 
 
