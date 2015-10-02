@@ -18,7 +18,10 @@ public class TaskScheduler {
         deadlinePQ = new TaskHeapPQ();
         LinkedList schedule = new LinkedList<>();
 
-        schedulerHelper(schedule, releasePQ, deadlinePQ, 3);
+        schedulerHelper(schedule, releasePQ, deadlinePQ, 2);
+        for (int i = 0; i < schedule.size(); i ++) {
+            System.out.println(schedule.get(i));
+        }
 //        System.out.println(releasePQ.min());
 //        releasePQ.printTasks();
 //        System.out.println(releasePQ.toString());
@@ -30,12 +33,13 @@ public class TaskScheduler {
 
     protected static void schedulerHelper(LinkedList schedule, HeapPriorityQueue releasePQ, HeapPriorityQueue deadlinePQ, int numOfCores) {
         int currentTime, releaseTime, coresCounter;
-        currentTime = 0; // check this
+        currentTime = 0;// check this
+        releaseTime = 0;
 //        coresCounter = 0;
 
-        while(!releasePQ.isEmpty()) {
+        while(!releasePQ.isEmpty() || !deadlinePQ.isEmpty()) {
             coresCounter = 0;
-            releaseTime = (Integer) releasePQ.min().getKey();
+            if (!releasePQ.isEmpty()) releaseTime = (Integer) releasePQ.min().getKey();
 
             // Accounts for if the cores were overflowed during previous currentTime value
             if (deadlinePQ.isEmpty()) {
