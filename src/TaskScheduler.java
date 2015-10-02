@@ -18,7 +18,7 @@ public class TaskScheduler {
         deadlinePQ = new TaskHeapPQ();
         LinkedList schedule = new LinkedList<>();
 
-        schedulerHelper(schedule, releasePQ, deadlinePQ, 2);
+        schedulerHelper(schedule, releasePQ, deadlinePQ, m);
         for (int i = 0; i < schedule.size(); i ++) {
             System.out.println(schedule.get(i));
         }
@@ -33,10 +33,10 @@ public class TaskScheduler {
 
     protected static void schedulerHelper(LinkedList schedule, HeapPriorityQueue releasePQ, HeapPriorityQueue deadlinePQ, int numOfCores) {
         int currentTime, releaseTime, coresCounter;
-        currentTime = 0;// check this
+        currentTime = 0;
         releaseTime = 0;
-//        coresCounter = 0;
 
+        // If either of them are NOT empty, keep going through.
         while(!releasePQ.isEmpty() || !deadlinePQ.isEmpty()) {
             coresCounter = 0;
             if (!releasePQ.isEmpty()) releaseTime = (Integer) releasePQ.min().getKey();
@@ -68,16 +68,11 @@ public class TaskScheduler {
                 ArrayList taskTime = new ArrayList();
                 taskTime.add((Task) deadlinePQ.removeMin().getValue());
                 taskTime.add(currentTime);
-
                 schedule.push(taskTime);
-
                 coresCounter ++;
             }
-
             currentTime ++;
         }
-
-//        return;
     }
 
     /**
@@ -98,32 +93,55 @@ public class TaskScheduler {
             Scanner input = new Scanner(f);
             String inputString = "";
 
+//            while (input.hasNextLine()) {
+//                inputString += input.nextLine();
+//            }
+//
+//            String[] inputStringArray = inputString.split("\\W+");
+//            int counter = 0;
+//
+//            for (String taskDatum: inputStringArray) {
+////                if (taskDatum.isEmpty()) continue;
+//                if (counter < 3) {
+//                    taskStringArray[counter] = taskDatum;
+//                    counter ++;
+//                }
+//                if (counter == 3) {
+//                    String taskString = Arrays.toString(taskStringArray);
+//                    System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
+//                    String name = taskStringArray[0];
+//                    Integer release = Integer.parseInt(taskStringArray[1]);
+//                    Integer deadline = Integer.parseInt(taskStringArray[2]);
+//
+//                    releasePQ.insert(release, new Task(name, release, deadline));
+//                    counter = 0;
+//                }
+//            }
+            
             while (input.hasNextLine()) {
-                inputString += input.nextLine();
-            }
+                String[] inputStringArray = input.nextLine().split("\\W+");
+                int counter = 0;
 
-            String[] inputStringArray = inputString.split(" ");
-            int counter = 0;
-//            int testCounter = 0;
+                for (String taskDatum: inputStringArray) {
+//                if (taskDatum.isEmpty()) continue;
+                    if (counter < 3) {
+                        taskStringArray[counter] = taskDatum;
+                        counter ++;
+                    }
+                    if (counter == 3) {
+                        String taskString = Arrays.toString(taskStringArray);
+                        System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
+                        String name = taskStringArray[0];
+                        Integer release = Integer.parseInt(taskStringArray[1]);
+                        Integer deadline = Integer.parseInt(taskStringArray[2]);
 
-            for (String taskDatum: inputStringArray) {
-                if (counter < 3) {
-                    taskStringArray[counter] = taskDatum;
-                    counter ++;
-                }
-                if (counter == 3) {
-                    String taskString = Arrays.toString(taskStringArray);
-                    System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
-                    String name = taskStringArray[0];
-                    Integer release = Integer.parseInt(taskStringArray[1]);
-                    Integer deadline = Integer.parseInt(taskStringArray[2]);
-
-                    releasePQ.insert(release, new Task(name, release, deadline));
-//                    System.out.println( releasePQ.min().getValue().name);
-//                    taskArrayList.add(new Task(name, release, deadline));
-                    counter = 0;
+                        releasePQ.insert(release, new Task(name, release, deadline));
+                        counter = 0;
+                    }
                 }
             }
+
+
         }
         catch (FileNotFoundException e) {
             System.out.println("File wasn't found.");
@@ -136,11 +154,13 @@ public class TaskScheduler {
 
     public static void main(String[] args) throws Exception{
 
-        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
+//        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
 //        /** There is a feasible schedule on 4 cores */
 //        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 3);
 //        /** There is no feasible schedule on 3 cores */
-//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
+//        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 2);
+
+        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
 //        /** There is a feasible scheduler on 5 cores */
 //        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
 //        /** There is no feasible schedule on 4 cores */
