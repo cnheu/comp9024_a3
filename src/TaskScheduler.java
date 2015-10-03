@@ -171,7 +171,7 @@ public class TaskScheduler {
 
     public static void main(String[] args) throws Exception{
 
-        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
+//        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
         /** There is a feasible schedule on 4 cores */
 
 //        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 3);
@@ -186,8 +186,9 @@ public class TaskScheduler {
         /** The sample task sets are sorted. You can shuffle the tasks and test your program again */
 
         /** MY TESTS */
-//        TaskScheduler.scheduler("samplefile1_nospaceafterdeadline.txt", "feasibleschedule2", 3);
-//        TaskScheduler.scheduler("samplefile1_nospaceaftername.txt", "feasibleschedule2", 3);
+//        TaskScheduler.scheduler("samplefile1_nospaceafterdeadline.txt", "feasibleschedule5", 3);
+//        TaskScheduler.scheduler("samplefile1_nospaceaftername.txt", "feasibleschedule6", 3);
+        TaskScheduler.scheduler("samplefile2_scrambled.txt", "feasibleschedule6", 5);
 
     }
 }
