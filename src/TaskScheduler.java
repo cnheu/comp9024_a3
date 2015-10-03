@@ -12,34 +12,34 @@ import java.io.FileNotFoundException;
 import java.util.*;
 //import java.util.
 //import java.awt.Entr
-import java.util.Map.Entry;
 
 
 public class TaskScheduler {
     static void scheduler(String file1, String file2, Integer m) {
+        Path currentRelativePath = Paths.get("");
+        String path = currentRelativePath.toAbsolutePath().toString() + "/";
 
-        HeapPriorityQueue releasePQ, deadlinePQ;
+        HeapPriorityQueue releasePQ = new HeapPriorityQueue();
+        HeapPriorityQueue deadlinePQ = new HeapPriorityQueue();
 
-        releasePQ = fileToReleasePQ(file1);
-        deadlinePQ = new TaskHeapPQ();
+        if(!populateReleasePQ(releasePQ, file1, path)) return;
+
         ArrayList schedule = new ArrayList<>(releasePQ.size());
 
-        schedulerHelper(schedule, releasePQ, deadlinePQ, m);
+        if (!schedulerHelper(schedule, releasePQ, deadlinePQ, m)) {
+            System.out.println("No feasible schedule exists for: " + file1 + " with " + m.toString() + " cores."  );
+            return;
+        }
+
         for (int i = 0; i < schedule.size(); i ++) {
             System.out.println(schedule.get(i));
         }
 
-        createScheduleFile(schedule, file2);
-//        System.out.println(releasePQ.min());
-//        releasePQ.printTasks();
-//        System.out.println(releasePQ.toString());
-
-//
-
+        createScheduleFile(schedule, file2, path);
 
     }
 
-    protected static void schedulerHelper(ArrayList schedule, HeapPriorityQueue releasePQ, HeapPriorityQueue deadlinePQ, int numOfCores) {
+    protected static boolean schedulerHelper(ArrayList schedule, HeapPriorityQueue releasePQ, HeapPriorityQueue deadlinePQ, int numOfCores) {
         int currentTime, releaseTime, coresCounter;
         currentTime = 0;
         releaseTime = 0;
@@ -54,9 +54,9 @@ public class TaskScheduler {
                 currentTime = releaseTime;
             }
             else {
-                if (currentTime > (Integer) deadlinePQ.min().getKey()) {
-                    System.out.println("Core overflow. No valid schedule for Task: "+deadlinePQ.min().getValue());
-                    return;
+                if (currentTime >= (Integer) deadlinePQ.min().getKey()) {
+//                    System.out.println("Point of scheduling failure was: "+deadlinePQ.min().getValue());
+                    return false;
                 }
             }
 
@@ -81,20 +81,20 @@ public class TaskScheduler {
             }
             currentTime ++;
         }
+        return true;
     }
 
     /**
-     * fileToArray
+     * populateReleasePQ
      *
      * Takes the task input list file and converts it into a PQ for processing
      *
      * @param file1
      * @return
      */
-    protected static TaskHeapPQ<Integer,Task> fileToReleasePQ(String file1) {
-        file1 = "/Users/christophernheu/IdeaProjects/comp9024_a3/src/" + file1;
+    protected static boolean populateReleasePQ(HeapPriorityQueue releasePQ, String file1, String path) {
+        file1 = path + file1;
         File f = new File(file1);
-        TaskHeapPQ<Integer,Task> releasePQ = new TaskHeapPQ<>();
         String[] taskStringArray = new String[3];
 
         try {
@@ -109,7 +109,6 @@ public class TaskScheduler {
             int counter = 0;
 
             for (String taskDatum: inputStringArray) {
-//                if (taskDatum.isEmpty()) continue;
                 if (counter < 3) {
                     taskStringArray[counter] = taskDatum;
                     counter ++;
@@ -125,50 +124,27 @@ public class TaskScheduler {
                     counter = 0;
                 }
             }
-
-            // Process each row one at a time
-//            while (input.hasNextLine()) {
-//                String[] inputStringArray = input.nextLine().split("\\W+");
-//                int counter = 0;
-//
-//                for (String taskDatum: inputStringArray) {
-////                if (taskDatum.isEmpty()) continue;
-//                    if (counter < 3) {
-//                        taskStringArray[counter] = taskDatum;
-//                        counter ++;
-//                    }
-//                    if (counter == 3) {
-//                        String taskString = Arrays.toString(taskStringArray);
-//                        System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
-//                        String name = taskStringArray[0];
-//                        Integer release = Integer.parseInt(taskStringArray[1]);
-//                        Integer deadline = Integer.parseInt(taskStringArray[2]);
-//
-//                        releasePQ.insert(release, new Task(name, release, deadline));
-//                        counter = 0;
-//                    }
-//                }
-//            }
-
-
         }
         catch (FileNotFoundException e) {
-            System.out.println("File wasn't found.");
+            System.out.println(e.getMessage());
+            return false;
         }
 
-        return releasePQ;
+        return true;
     }
 
-    //TODO: write ArrayList schedule to a file
-    protected static void createScheduleFile(ArrayList schedule, String file2) {
-        Path currentRelativePath = Paths.get("");
-        String s = currentRelativePath.toAbsolutePath().toString();
-//        System.out.println("Current relative path is: " + s);
+    /**
+     *
+     * @param schedule
+     * @param file2
+     * @param path
+     */
+    protected static void createScheduleFile(ArrayList schedule, String file2, String path) {
+        String scheduleFileName = path + file2 + ".txt";
 
         try{
-
-            File scheduleFile = new File(s + "/src/file2.txt");
-            if (scheduleFile.exists()) throw new Exception("Schedule file could not be made since a file with the same name already exists.");
+            File scheduleFile = new File(scheduleFileName);
+            if (scheduleFile.exists()) throw new Exception("File already exists.");
             scheduleFile.createNewFile();
             FileWriter fw = new FileWriter(scheduleFile);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -189,22 +165,26 @@ public class TaskScheduler {
             e.printStackTrace();
         }
         catch(Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println( scheduleFileName + " (File already exists)");
         }
     }
 
     public static void main(String[] args) throws Exception{
 
 //        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
-//        /** There is a feasible schedule on 4 cores */
+        /** There is a feasible schedule on 4 cores */
+
 //        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 3);
-//        /** There is no feasible schedule on 3 cores */
+        /** There is no feasible schedule on 3 cores */
+
 //        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 2);
 
-//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
-//        /** There is a feasible scheduler on 5 cores */
-        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
-//        /** There is no feasible schedule on 4 cores */
+        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
+        /** There is a feasible scheduler on 5 cores */
+
+//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
+        /** There is no feasible schedule on 4 cores */
+//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule5", 3);
 
         /** The sample task sets are sorted. You can shuffle the tasks and test your program again */
     }
@@ -214,23 +194,14 @@ class Task {
     public String name;
     public int release;
     public int deadline;
-//    public String print;
 
     public Task (String name, int release, int deadline) {
         this.name = name;
         this.release = release;
         this.deadline = deadline;
-//        this.print = "[" + this.name + ", " + Integer.toString(this.release) + ", " +
-//                Integer.toString(this.deadline) + "]";
     }
 
     public String toString() {
         return this.name;
-    }
-}
-
-class TaskHeapPQ<K,V> extends HeapPriorityQueue {
-    public TaskHeapPQ() {
-        super();
     }
 }
