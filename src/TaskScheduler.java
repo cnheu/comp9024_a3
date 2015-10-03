@@ -5,37 +5,44 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
-//import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.io.FileNotFoundException;
 import java.util.*;
-//import java.util.
-//import java.awt.Entr
 
 
 public class TaskScheduler {
     static void scheduler(String file1, String file2, Integer m) {
-        Path currentRelativePath = Paths.get("");
-        String path = currentRelativePath.toAbsolutePath().toString() + "/";
 
         HeapPriorityQueue releasePQ = new HeapPriorityQueue();
         HeapPriorityQueue deadlinePQ = new HeapPriorityQueue();
-
-        if(!populateReleasePQ(releasePQ, file1, path)) return;
-
         ArrayList schedule = new ArrayList<>(releasePQ.size());
 
+        Path currentRelativePath = Paths.get("");
+        String path = currentRelativePath.toAbsolutePath().toString() + "/";
+        String scheduleFileName = path + file2 + ".txt";
+        File scheduleFile = new File(scheduleFileName);
+
+        // Return if file2 already exists.
+        if (scheduleFile.exists()) {
+            System.out.println("[ERROR] " + scheduleFileName + " (File already exists)");
+            return;
+        }
+
+        // Return if file1 is invalid.
+        if(!populateReleasePQ(releasePQ, file1, path)) return;
+
+        // Return if no feasible schedule exists.
         if (!schedulerHelper(schedule, releasePQ, deadlinePQ, m)) {
             System.out.println("[ERROR] No feasible schedule exists for: " + file1 + " with " + m.toString() + " cores."  );
             return;
         }
 
-        for (int i = 0; i < schedule.size(); i ++) {
-            System.out.println(schedule.get(i));
-        }
+//        for (int i = 0; i < schedule.size(); i ++) {
+//            System.out.println(schedule.get(i));
+//        }
 
-        createScheduleFile(schedule, file2, path);
+        populateScheduleFile(schedule, scheduleFile, path);
 
     }
 
@@ -137,18 +144,10 @@ public class TaskScheduler {
         return true;
     }
 
-    /**
-     *
-     * @param schedule
-     * @param file2
-     * @param path
-     */
-    protected static void createScheduleFile(ArrayList schedule, String file2, String path) {
-        String scheduleFileName = path + file2 + ".txt";
+    protected static void populateScheduleFile(ArrayList schedule, File scheduleFile, String path) {
 
         try{
-            File scheduleFile = new File(scheduleFileName);
-            if (scheduleFile.exists()) throw new Exception("File already exists.");
+
             scheduleFile.createNewFile();
             FileWriter fw = new FileWriter(scheduleFile);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -168,14 +167,11 @@ public class TaskScheduler {
         catch(IOException e) {
             e.printStackTrace();
         }
-        catch(Exception e) {
-            System.out.println("[ERROR] " + scheduleFileName + " (File already exists)");
-        }
     }
 
     public static void main(String[] args) throws Exception{
 
-//        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
+        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
         /** There is a feasible schedule on 4 cores */
 
 //        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 3);
@@ -186,7 +182,6 @@ public class TaskScheduler {
 
 //        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
         /** There is no feasible schedule on 4 cores */
-//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule5", 3);
 
         /** The sample task sets are sorted. You can shuffle the tasks and test your program again */
 
