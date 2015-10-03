@@ -2,6 +2,10 @@
  * Created by christophernheu on 27/09/15.
  */
 import java.io.File;
+import java.io.IOException;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+//import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.io.FileNotFoundException;
@@ -157,14 +161,37 @@ public class TaskScheduler {
 
     //TODO: write ArrayList schedule to a file
     protected static void createScheduleFile(ArrayList schedule, String file2) {
-//        File scheduleFile = new File()
         Path currentRelativePath = Paths.get("");
         String s = currentRelativePath.toAbsolutePath().toString();
-        System.out.println("Current relative path is: " + s);
-        File scheduleFile = new File(s + "/src/file2.txt");
+//        System.out.println("Current relative path is: " + s);
+
+        try{
+
+            File scheduleFile = new File(s + "/src/file2.txt");
+            if (scheduleFile.exists()) throw new Exception("Schedule file could not be made since a file with the same name already exists.");
+            scheduleFile.createNewFile();
+            FileWriter fw = new FileWriter(scheduleFile);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            for(int i = 0; i < schedule.size(); i++) {
+                String taskString = "";
+                ArrayList taskTime = (ArrayList) schedule.get(i);
+                Task task = (Task) taskTime.get(0);
+                Integer time = (Integer) taskTime.get(1);
+                taskString += task.toString() + " " + time.toString() + " ";
+                bw.write(taskString);
+            }
+            bw.close();
+            fw.close();
+
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
+        catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
-
-
 
     public static void main(String[] args) throws Exception{
 
