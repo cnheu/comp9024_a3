@@ -2,6 +2,8 @@
  * Created by christophernheu on 27/09/15.
  */
 import java.io.File;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.io.FileNotFoundException;
 import java.util.*;
 //import java.util.
@@ -22,6 +24,8 @@ public class TaskScheduler {
         for (int i = 0; i < schedule.size(); i ++) {
             System.out.println(schedule.get(i));
         }
+
+        createScheduleFile(schedule, file2);
 //        System.out.println(releasePQ.min());
 //        releasePQ.printTasks();
 //        System.out.println(releasePQ.toString());
@@ -93,54 +97,54 @@ public class TaskScheduler {
             Scanner input = new Scanner(f);
             String inputString = "";
 
-//            while (input.hasNextLine()) {
-//                inputString += input.nextLine();
-//            }
-//
-//            String[] inputStringArray = inputString.split("\\W+");
-//            int counter = 0;
-//
-//            for (String taskDatum: inputStringArray) {
-////                if (taskDatum.isEmpty()) continue;
-//                if (counter < 3) {
-//                    taskStringArray[counter] = taskDatum;
-//                    counter ++;
-//                }
-//                if (counter == 3) {
-//                    String taskString = Arrays.toString(taskStringArray);
-//                    System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
-//                    String name = taskStringArray[0];
-//                    Integer release = Integer.parseInt(taskStringArray[1]);
-//                    Integer deadline = Integer.parseInt(taskStringArray[2]);
-//
-//                    releasePQ.insert(release, new Task(name, release, deadline));
-//                    counter = 0;
-//                }
-//            }
-
-            // Process each row one at a time
             while (input.hasNextLine()) {
-                String[] inputStringArray = input.nextLine().split("\\W+");
-                int counter = 0;
+                inputString += input.nextLine() + "\n";
+            }
 
-                for (String taskDatum: inputStringArray) {
+            String[] inputStringArray = inputString.split("\\W+");
+            int counter = 0;
+
+            for (String taskDatum: inputStringArray) {
 //                if (taskDatum.isEmpty()) continue;
-                    if (counter < 3) {
-                        taskStringArray[counter] = taskDatum;
-                        counter ++;
-                    }
-                    if (counter == 3) {
-                        String taskString = Arrays.toString(taskStringArray);
-                        System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
-                        String name = taskStringArray[0];
-                        Integer release = Integer.parseInt(taskStringArray[1]);
-                        Integer deadline = Integer.parseInt(taskStringArray[2]);
+                if (counter < 3) {
+                    taskStringArray[counter] = taskDatum;
+                    counter ++;
+                }
+                if (counter == 3) {
+                    String taskString = Arrays.toString(taskStringArray);
+                    System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
+                    String name = taskStringArray[0];
+                    Integer release = Integer.parseInt(taskStringArray[1]);
+                    Integer deadline = Integer.parseInt(taskStringArray[2]);
 
-                        releasePQ.insert(release, new Task(name, release, deadline));
-                        counter = 0;
-                    }
+                    releasePQ.insert(release, new Task(name, release, deadline));
+                    counter = 0;
                 }
             }
+
+            // Process each row one at a time
+//            while (input.hasNextLine()) {
+//                String[] inputStringArray = input.nextLine().split("\\W+");
+//                int counter = 0;
+//
+//                for (String taskDatum: inputStringArray) {
+////                if (taskDatum.isEmpty()) continue;
+//                    if (counter < 3) {
+//                        taskStringArray[counter] = taskDatum;
+//                        counter ++;
+//                    }
+//                    if (counter == 3) {
+//                        String taskString = Arrays.toString(taskStringArray);
+//                        System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
+//                        String name = taskStringArray[0];
+//                        Integer release = Integer.parseInt(taskStringArray[1]);
+//                        Integer deadline = Integer.parseInt(taskStringArray[2]);
+//
+//                        releasePQ.insert(release, new Task(name, release, deadline));
+//                        counter = 0;
+//                    }
+//                }
+//            }
 
 
         }
@@ -152,6 +156,13 @@ public class TaskScheduler {
     }
 
     //TODO: write ArrayList schedule to a file
+    protected static void createScheduleFile(ArrayList schedule, String file2) {
+//        File scheduleFile = new File()
+        Path currentRelativePath = Paths.get("");
+        String s = currentRelativePath.toAbsolutePath().toString();
+        System.out.println("Current relative path is: " + s);
+        File scheduleFile = new File(s + "/src/file2.txt");
+    }
 
 
 
@@ -163,9 +174,9 @@ public class TaskScheduler {
 //        /** There is no feasible schedule on 3 cores */
 //        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 2);
 
-        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
+//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
 //        /** There is a feasible scheduler on 5 cores */
-//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
+        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
 //        /** There is no feasible schedule on 4 cores */
 
         /** The sample task sets are sorted. You can shuffle the tasks and test your program again */
