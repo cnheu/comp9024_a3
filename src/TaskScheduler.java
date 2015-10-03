@@ -27,7 +27,7 @@ public class TaskScheduler {
         ArrayList schedule = new ArrayList<>(releasePQ.size());
 
         if (!schedulerHelper(schedule, releasePQ, deadlinePQ, m)) {
-            System.out.println("No feasible schedule exists for: " + file1 + " with " + m.toString() + " cores."  );
+            System.out.println("[ERROR] No feasible schedule exists for: " + file1 + " with " + m.toString() + " cores."  );
             return;
         }
 
@@ -126,7 +126,11 @@ public class TaskScheduler {
             }
         }
         catch (FileNotFoundException e) {
-            System.out.println(e.getMessage());
+            System.out.println("[ERROR] " + e.getMessage());
+            return false;
+        }
+        catch (NumberFormatException e) {
+            System.out.println("[ERROR] the task attributes of " + file1 + " do not follow the format required. " + e.getMessage());
             return false;
         }
 
@@ -165,7 +169,7 @@ public class TaskScheduler {
             e.printStackTrace();
         }
         catch(Exception e) {
-            System.out.println( scheduleFileName + " (File already exists)");
+            System.out.println("[ERROR] " + scheduleFileName + " (File already exists)");
         }
     }
 
@@ -177,9 +181,7 @@ public class TaskScheduler {
 //        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 3);
         /** There is no feasible schedule on 3 cores */
 
-//        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 2);
-
-        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
+//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
         /** There is a feasible scheduler on 5 cores */
 
 //        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
@@ -187,6 +189,11 @@ public class TaskScheduler {
 //        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule5", 3);
 
         /** The sample task sets are sorted. You can shuffle the tasks and test your program again */
+
+        /** MY TESTS */
+//        TaskScheduler.scheduler("samplefile1_nospaceafterdeadline.txt", "feasibleschedule2", 3);
+//        TaskScheduler.scheduler("samplefile1_nospaceaftername.txt", "feasibleschedule2", 3);
+
     }
 }
 
