@@ -220,7 +220,7 @@ public class TaskScheduler {
 
             // INNER LOOP #1
             // We want to add all the tasks with releaseTime equal to the currentTime, if the next earliest releaseTime task is > currentTime we don't go through this.
-            while (releaseTime == currentTime) {
+            while (releaseTime == currentTime && !releasePQ.isEmpty()) {
 
                 HeapPriorityQueue.MyEntry minReleaseEntry = (HeapPriorityQueue.MyEntry) releasePQ.removeMin(); // O(1) - this is a priority queue invariable.
                 Task minReleaseTask = (Task) minReleaseEntry.getValue(); // O(1)
@@ -282,28 +282,32 @@ public class TaskScheduler {
 
     public static void main(String[] args) throws Exception{
 
-//        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
+        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule1", 4);
         /** There is a feasible schedule on 4 cores */
 
-//        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 3);
+        TaskScheduler.scheduler("samplefile1.txt", "feasibleschedule2", 3);
         /** There is no feasible schedule on 3 cores */
 
-//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
+        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule3", 5);
         /** There is a feasible scheduler on 5 cores */
 
-//        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
+        TaskScheduler.scheduler("samplefile2.txt", "feasibleschedule4", 4);
         /** There is no feasible schedule on 4 cores */
 
         /** The sample task sets are sorted. You can shuffle the tasks and test your program again */
 
         /** MY TESTS */
-//        TaskScheduler.scheduler("samplefile1_nospaceafterdeadline.txt", "feasibleschedule5", 3);
-//        TaskScheduler.scheduler("samplefile1_nospaceaftername.txt", "feasibleschedule6", 3);
-//        TaskScheduler.scheduler("samplefile2_scrambled.txt", "feasibleschedule6", 5);
-//        TaskScheduler.scheduler("samplefile_empty.txt", "feasibleschedule7", 5);
-//        TaskScheduler.scheduler("samplefile1_onlyname.txt", "feasibleschedule8", 5);
-//        TaskScheduler.scheduler("samplefile1_incompletetask.txt", "feasibleschedule9", 4);
+        TaskScheduler.scheduler("samplefile1_nospaceafterdeadline.txt", "feasibleschedule5", 3);
+        TaskScheduler.scheduler("samplefile1_nospaceaftername.txt", "feasibleschedule6", 3);
+        TaskScheduler.scheduler("samplefile2_scrambled.txt", "feasibleschedule6", 5);
+        TaskScheduler.scheduler("samplefile_empty.txt", "feasibleschedule7", 5);
+        TaskScheduler.scheduler("samplefile1_onlyname.txt", "feasibleschedule8", 5);
+        TaskScheduler.scheduler("samplefile1_incompletetask.txt", "feasibleschedule9", 4);
         TaskScheduler.scheduler("samplefile1_scrambled.txt", "feasibleschedule10", 4);
+        TaskScheduler.scheduler("samplefile3.txt", "feasibleschedule11", 3);
+        TaskScheduler.scheduler("samplefile3.txt", "feasibleschedule12", 2);
+
+
 
 
         // TODO: scrambled samplefile1_scrambled.txt
