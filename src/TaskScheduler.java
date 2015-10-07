@@ -191,18 +191,101 @@ public class TaskScheduler {
      * @param numOfCores
      * @return
      */
+//    protected static boolean schedulerHelper(ArrayList schedule, HeapPriorityQueue<Integer,Task> releasePQ, HeapPriorityQueue<Integer,Task> deadlinePQ, int numOfCores) {
+//        int currentTime, releaseTime, coresCounter; // O(1)
+//        currentTime = 0; // O(1)
+//        releaseTime = 0; // O(1)
+//
+//        // OUTER LOOP #1
+//        // We want to continue processing the PQs whilst at least ONE of them is not empty.
+//        // Therefore, this OUTER LOOP can run theoretically 2n times.
+//        while(!releasePQ.isEmpty() || !deadlinePQ.isEmpty()) {
+//            coresCounter = 0; // O(1)
+//
+//            // IF releasePQ is NOT empty, capture the releaseTime of the next task to be added to deadlinePQ.
+//            if (!releasePQ.isEmpty()) releaseTime = releasePQ.min().getKey(); // O(1)
+//
+//            // IF deadlinePQ is empty, we move the currentTime tracker to the next releaseTime.
+//            // ELSE, if it isn't empty, that means the tasks of the same releaseTime overflowed the previous scheduling
+//            // loop. So now we must check that currentTime hasn't gone past the deadline of the earliest first deadline.
+//            if (deadlinePQ.isEmpty()) {  // O(1)
+//                currentTime = releaseTime; // O(1)
+//            }
+//            else { // O(1)
+//                if (currentTime >= deadlinePQ.min().getKey()) { // O(1)
+//                    System.out.println("Task of scheduling failure was: "+deadlinePQ.min().getValue());
+//                    return false;
+//                }
+//            }
+//
+//            // INNER LOOP #1
+//            // We want to add all the tasks with releaseTime equal to the currentTime, if the next earliest releaseTime task is > currentTime we don't go through this.
+//            while (releaseTime == currentTime && !releasePQ.isEmpty()) {
+//
+//                HeapPriorityQueue.MyEntry minReleaseEntry = (HeapPriorityQueue.MyEntry) releasePQ.removeMin(); // O(1) - this is a priority queue invariable.
+//                Task minReleaseTask = (Task) minReleaseEntry.getValue(); // O(1)
+//                deadlinePQ.insert(minReleaseTask.deadline, minReleaseTask); // O(logn) - heap priority queue invariable
+//                // IF we've removed the last task from releasePQ and inserted it, we no longer need to keep going.
+//                if (releasePQ.isEmpty()) break; // O(1)
+//                // We peek at the next earliest releaseTime.
+//                releaseTime = releasePQ.min().getKey(); // O(1)
+//            }
+//
+//            // INNER LOOP #2
+//            // Removes the task with the next earliest deadline from deadlinePQ and adds it to the schedule in an ArrayList taskTime.
+//            while (coresCounter < numOfCores && !deadlinePQ.isEmpty() ) {
+////                if (deadlinePQ.isEmpty()) break; // O(1)
+//                ArrayList taskTime = new ArrayList(); // O(1)
+//                taskTime.add(deadlinePQ.removeMin().getValue()); // O(1) - priority queue invariable
+//                taskTime.add(currentTime); // O(1)
+//                schedule.add(taskTime); // O(1)
+//                coresCounter ++; // O(1)
+//            }
+//            currentTime ++; // O(1)
+//        }
+//        return true;
+//    }
+
+    /**
+     * schedulerHelper
+     *
+     * Time Complexity: O(nlogn)
+     *
+     * schedulerHelper achieved O(nlogn) time complexity by ensuring that we only process each task ONCE and at most in logn time complexity.
+     *
+     * This algorithm consists of the Main Loop (ML), a series of constant time operations (CTOs) and two logic IF (IF1 and IF2) statements.
+     *
+     * i) IF1 can only run IF !releasePQ.isEmpty. Also each time it runs, it will perform releasePQ.removeMin() and deadlinePQ.insert() ONCE and ONCE only.
+     * This means that by definition IF1 can only execute n times. The deadlinePQ.insert() call is the most expensive action, so the time complexity of IF1 = O(nlogn)
+     *
+     * ii) From i), IF2 and the FOR loop it contains, can also by definition only run at most n times. Since each iteration contains a deadlinePQ.remove(). Since all of the actions
+     * in IF2 occur in constant time, the total time complexity of IF2 = O(n).
+     *
+     * iii) Since ML can only run when either releasePQ or deadlinePQ is NOT empty, we can say the following. It can run at most n times, whilst !releasePQ.isEmpty(). But assuming
+     * is a properly functional one, deadlinePQ may take no more than n extra iterations to empty out. Therefore, we can say ML has an upper bound of 2n iterations.
+     *
+     * Therefore, total number of operations can be said to be:
+     * (n * IF1) + (n * IF2) + (2n * CTOs)
+     *
+     * Hence total complexity = O(nlogn) + O(n) + O(2n) = O(nlogn).
+     *
+     *
+     * @param schedule
+     * @param releasePQ
+     * @param deadlinePQ
+     * @param numOfCores
+     * @return
+     */
     protected static boolean schedulerHelper(ArrayList schedule, HeapPriorityQueue<Integer,Task> releasePQ, HeapPriorityQueue<Integer,Task> deadlinePQ, int numOfCores) {
-        int currentTime, releaseTime, coresCounter; // O(1)
+        int currentTime, releaseTime, peekNextReleaseTime; // O(1)
         currentTime = 0; // O(1)
         releaseTime = 0; // O(1)
+        peekNextReleaseTime = 0;
 
-        // OUTER LOOP #1
-        // We want to continue processing the PQs whilst at least ONE of them is not empty.
-        // Therefore, this OUTER LOOP can run theoretically 2n times.
+        // MAIN LOOP will run as long as either releasePQ or deadlinePQ is NOT empty.
         while(!releasePQ.isEmpty() || !deadlinePQ.isEmpty()) {
-            coresCounter = 0; // O(1)
 
-            // IF releasePQ is NOT empty, capture the releaseTime of the next task to be added to deadlinePQ.
+
             if (!releasePQ.isEmpty()) releaseTime = releasePQ.min().getKey(); // O(1)
 
             // IF deadlinePQ is empty, we move the currentTime tracker to the next releaseTime.
@@ -211,37 +294,40 @@ public class TaskScheduler {
             if (deadlinePQ.isEmpty()) {  // O(1)
                 currentTime = releaseTime; // O(1)
             }
-            else { // O(1)
-                if (currentTime >= deadlinePQ.min().getKey()) { // O(1)
-                    System.out.println("Task of scheduling failure was: "+deadlinePQ.min().getValue());
-                    return false;
-                }
+            else if (currentTime >= deadlinePQ.min().getKey()) { // O(1)
+                System.out.println("Task of scheduling failure was: "+deadlinePQ.min().getValue()); // O(1)
+                return false;
             }
 
-            // INNER LOOP #1
-            // We want to add all the tasks with releaseTime equal to the currentTime, if the next earliest releaseTime task is > currentTime we don't go through this.
-            while (releaseTime == currentTime && !releasePQ.isEmpty()) {
+            // IF Statement #1
+            // This IF statement, determines if there are tasks in releasePQ with a releaseTime == currentTime.'
+            // We use this so that we can add all tasks with same releaseTime (and any that overflowed the cores in previous loops) to the deadlinePQ.
+            if (releaseTime == currentTime && !releasePQ.isEmpty()) {
 
                 HeapPriorityQueue.MyEntry minReleaseEntry = (HeapPriorityQueue.MyEntry) releasePQ.removeMin(); // O(1) - this is a priority queue invariable.
                 Task minReleaseTask = (Task) minReleaseEntry.getValue(); // O(1)
                 deadlinePQ.insert(minReleaseTask.deadline, minReleaseTask); // O(logn) - heap priority queue invariable
                 // IF we've removed the last task from releasePQ and inserted it, we no longer need to keep going.
-                if (releasePQ.isEmpty()) break; // O(1)
-                // We peek at the next earliest releaseTime.
-                releaseTime = releasePQ.min().getKey(); // O(1)
+                if (!releasePQ.isEmpty()) peekNextReleaseTime = releasePQ.min().getKey(); // O(1)
+
             }
 
-            // INNER LOOP #2
-            // Removes the task with the next earliest deadline from deadlinePQ and adds it to the schedule in an ArrayList taskTime.
-            while (coresCounter < numOfCores && !deadlinePQ.isEmpty() ) {
-//                if (deadlinePQ.isEmpty()) break; // O(1)
-                ArrayList taskTime = new ArrayList(); // O(1)
-                taskTime.add(deadlinePQ.removeMin().getValue()); // O(1) - priority queue invariable
-                taskTime.add(currentTime); // O(1)
-                schedule.add(taskTime); // O(1)
-                coresCounter ++; // O(1)
+            // IF Statement #2
+            // This IF statement, determines whether we have added ALL tasks with the same releaseTime to the deadlinePQ for EDF prioritisation.
+            // We know we've added them all IF peekNextReleaseTime revealed that the next task was different.
+            if (peekNextReleaseTime != currentTime || releasePQ.isEmpty()) {
+
+                // We proceed to add as many tasks in this currentTime slot as we can by removing them from the deadlinePQ.
+                for (int i = 0; i < numOfCores; i ++) {
+                    if (deadlinePQ.isEmpty()) break; // O(1)
+                    ArrayList taskTime = new ArrayList(); // O(1)
+                    taskTime.add(deadlinePQ.removeMin().getValue()); // O(1) - priority queue invariable
+                    taskTime.add(currentTime); // O(1)
+                    schedule.add(taskTime); // O(1)
+                }
+                currentTime++;
             }
-            currentTime ++; // O(1)
+
         }
         return true;
     }
