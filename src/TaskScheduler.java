@@ -21,6 +21,12 @@ public class TaskScheduler {
      * To summarise: The algorithm performs at most 2n priority heap insertions and 2n priority heap removals.
      * This enables the total complexity to stay within O(nlogn) time.
      *
+     * populateReleasePQ - performs n priority heap insertions into releasePQ
+     * schedulerHelper - performs n priority heap removals from releasePQ, n priority heap insertions into deadlinePQ,
+     * n priority heap removals from deadlinePQ and n pushes to the ArrayList schedule.
+     *
+     * Both populateReleasePQ and schedulerHelper run in O(nlogn) time.
+     *
      *
      * @param file1
      * @param file2
@@ -31,7 +37,7 @@ public class TaskScheduler {
 
         HeapPriorityQueue releasePQ = new HeapPriorityQueue(); // O(1)
         HeapPriorityQueue deadlinePQ = new HeapPriorityQueue(); // O(1)
-        ArrayList schedule = new ArrayList<>(releasePQ.size()); // O(1)
+        ArrayList schedule = new ArrayList<>(releasePQ.size()); // O(1) - note size is set to n (number of tasks) to remove need for resizing.
 
         Path currentRelativePath = Paths.get(""); // O(1)
         String path = currentRelativePath.toAbsolutePath().toString() + "/"; // O(1)
@@ -40,7 +46,7 @@ public class TaskScheduler {
 
         // Return if file2 already exists.
         if (scheduleFile.exists()) { // O(1)
-            System.out.println("[ERROR] " + scheduleFileName + " (File already exists)");
+//            System.out.println("[ERROR] " + scheduleFileName + " (File already exists)");
             return;
         }
 
@@ -109,7 +115,7 @@ public class TaskScheduler {
                     counter ++;
                 }
                 if (counter == 3) { // O(1) - this only happens once every 3 iterations.
-                    String taskString = Arrays.toString(taskStringArray); // O(1)
+//                    String taskString = Arrays.toString(taskStringArray); // O(1) - used below in the print for diagnostic reasons.
 //                    System.out.println(taskString); // print out the taskArray before it's instantiated into a Task object
                     String name = taskStringArray[0]; // O(1)
                     Integer release = Integer.parseInt(taskStringArray[1]); // O(1)
@@ -147,19 +153,18 @@ public class TaskScheduler {
      *
      * This algorithm consists of the Main Loop (ML), a series of constant time operations (CTOs) and two IF logic statements (IF1 and IF2) .
      *
-     * To justify the O(nlogn) complexity consider the below statments:
+     * To justify the O(nlogn) complexity consider the below statements:
      *
-     * i) IF1 can only run IF !releasePQ.isEmpty. Also each time it runs, it will perform releasePQ.removeMin() and deadlinePQ.insert() ONCE and ONCE only.
-     * This means that by definition IF1 can only execute n times. The deadlinePQ.insert() call is the most expensive action, so the time complexity of IF1 = O(nlogn)
+     * i) IF1 can only run IF !releasePQ.isEmpty. Also each time it runs, it will perform releasePQ.removeMin() and deadlinePQ.insert() exactly ONCE.
+     * This means that by definition IF1 will execute n times. The deadlinePQ.insert() call is the most expensive action, so the time complexity of IF1 = O(nlogn)
      *
      * ii) From i), IF2 and the FOR loop it contains, by definition can run at most n times, since each iteration contains a deadlinePQ.remove(). Since all of the actions
-     * in IF2 occur in constant time, the total time complexity of IF2 = O(n).
+     * in IF2 occur in constant time, the total time complexity of IF2 = O(n). It breaks immediately if deadlinePQ is empty.
      *
      * iii) Since ML can only run when either releasePQ or deadlinePQ is NOT empty, we can say the following. It can run at most n times, whilst !releasePQ.isEmpty().
      * Meanwhile, deadlinePQ can take no more than n extra iterations to empty out. Therefore, we can say ML has an upper bound of 2n iterations.
      *
-     * Therefore, total number of operations can be said to be:
-     * (n * IF1) + (n * IF2) + (2n * CTOs)
+     * Therefore, total number of operations can be said to be <=  (n * IF1) + (n * IF2) + (2n * CTOs)
      *
      * Hence total complexity = O(nlogn) + O(n) + O(2n) = O(nlogn).
      *
@@ -188,7 +193,7 @@ public class TaskScheduler {
                 currentTime = releaseTime; // O(1)
             }
             else if (currentTime >= deadlinePQ.min().getKey()) { // O(1)
-//                System.out.println("Task of scheduling failure was: "+deadlinePQ.min().getValue()); // O(1)
+//                System.out.println("Task of scheduling failure was: "+deadlinePQ.min().getValue()); // O(1) - for diagnostics to see where the scheduling failed
                 return false;
             }
 
@@ -278,13 +283,15 @@ public class TaskScheduler {
         /** MY TESTS */
         TaskScheduler.scheduler("samplefile1_nospaceafterdeadline.txt", "feasibleschedule5", 3);
         TaskScheduler.scheduler("samplefile1_nospaceaftername.txt", "feasibleschedule6", 3);
-        TaskScheduler.scheduler("samplefile2_scrambled.txt", "feasibleschedule6", 5);
-        TaskScheduler.scheduler("samplefile_empty.txt", "feasibleschedule7", 5);
-        TaskScheduler.scheduler("samplefile1_onlyname.txt", "feasibleschedule8", 5);
-        TaskScheduler.scheduler("samplefile1_incompletetask.txt", "feasibleschedule9", 4);
-        TaskScheduler.scheduler("samplefile1_scrambled.txt", "feasibleschedule10", 4);
-        TaskScheduler.scheduler("samplefile3.txt", "feasibleschedule11", 3);
-        TaskScheduler.scheduler("samplefile3.txt", "feasibleschedule12", 2);
+        TaskScheduler.scheduler("samplefile1_scrambled.txt", "feasibleschedule7", 4);
+        TaskScheduler.scheduler("samplefile1_scrambled.txt", "feasibleschedule8", 3);
+        TaskScheduler.scheduler("samplefile2_scrambled.txt", "feasibleschedule9", 5);
+        TaskScheduler.scheduler("samplefile2_scrambled.txt", "feasibleschedule10", 4);
+        TaskScheduler.scheduler("samplefile_empty.txt", "feasibleschedule11", 5);
+        TaskScheduler.scheduler("samplefile1_onlyname.txt", "feasibleschedule12", 5);
+        TaskScheduler.scheduler("samplefile1_incompletetask.txt", "feasibleschedule13", 4);
+        TaskScheduler.scheduler("samplefile3.txt", "feasibleschedule14", 3);
+        TaskScheduler.scheduler("samplefile3.txt", "feasibleschedule15", 2);
     }
 }
 
@@ -308,9 +315,10 @@ class Task {
     }
 }
 
+/** OLD SECTION DO NOT MARK **/
 
 /**
- * schedulerHelper OLD
+ * schedulerHelper
  *
  * Time Complexity: O(nlogn)
  *
