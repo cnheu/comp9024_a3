@@ -158,13 +158,13 @@ public class TaskScheduler {
      * i) IF1 can only run IF !releasePQ.isEmpty. Also each time it runs, it will perform releasePQ.removeMin() and deadlinePQ.insert() exactly ONCE.
      * This means that by definition IF1 will execute n times. The deadlinePQ.insert() call is the most expensive action, so the time complexity of IF1 = O(nlogn)
      *
-     * ii) From i), IF2 and the FOR loop it contains, by definition can run at most n times, since each iteration contains a deadlinePQ.remove(). Since all of the actions
-     * in IF2 occur in constant time, the total time complexity of IF2 = O(n). It breaks immediately if deadlinePQ is empty.
+     * ii) From i), deadlinePQ can have AT MOST n elements. Therefore, IF2 and the FOR loop it contains, because each iteration contains a deadlinePQ.remove() it can only run n times.
+     * Since all of the individual operations in IF2 occur in constant time, the total time complexity of IF2 = O(n). (NB: The For loop breaks immediately if deadlinePQ is empty).
      *
      * iii) Since ML can only run when either releasePQ or deadlinePQ is NOT empty, we can say the following. It can run at most n times, whilst !releasePQ.isEmpty().
      * Meanwhile, deadlinePQ can take no more than n extra iterations to empty out. Therefore, we can say ML has an upper bound of 2n iterations.
      *
-     * Therefore, total number of operations can be said to be <=  (n * IF1) + (n * IF2) + (2n * CTOs)
+     * Therefore, taking an upperbound, total number of operations in ML can be said to be <=  (n * IF1) + (n * IF2) + (2n * CTOs)
      *
      * Hence total complexity = O(nlogn) + O(n) + O(2n) = O(nlogn).
      *
@@ -207,7 +207,6 @@ public class TaskScheduler {
                 deadlinePQ.insert(minReleaseTask.deadline, minReleaseTask); // O(logn) - heap priority queue invariable
                 // IF we've removed the last task from releasePQ and inserted it, we no longer need to keep going.
                 if (!releasePQ.isEmpty()) peekNextReleaseTime = releasePQ.min().getKey(); // O(1)
-
             }
 
             // IF Statement #2
